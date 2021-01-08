@@ -1,0 +1,74 @@
+<html>
+<head>
+<title>Happy Hour</title>
+</head>
+
+<body>
+
+<div id="happy_hour">
+
+<div id="button_list" style="position:absolute;left:0px;top:0px;width:10%">
+<div id="room_buttons">
+<input type="button" id="room0" onclick="join_room(0)" style="width:100%" value="Room 1"><br>
+<input type="button" id="room1" onclick="join_room(1)" style="width:100%" value="Room 2"><br>
+<input type="button" id="room2" onclick="join_room(2)" style="width:100%" value="Room 3">
+<input type="button" id="room3" onclick="join_room(3)" style="width:100%" value="Room 4"><br>
+<input type="button" id="room4" onclick="join_room(4)" style="width:100%" value="Room 5"><br>
+<input type="button" id="room5" onclick="join_room(5)" style="width:100%" value="Room 6">
+</div>
+<br><br>
+<div id="control_buttons">
+<input type="button" id="subject_button" onclick="subject_form_show(true)" style="width:100%" value="Set Subject">
+<input type="button" id="jukebox_button" onclick="jukebox_form_show(true)" style="width:100%" value="Play Music">
+<input type="button" id="about_button" onclick="about_form_show(true)" style="width:100%" value="About">
+</div>
+</div>
+
+<div id="video" style="position:absolute;right:0px;top:0px;width:90%;height:100%">
+</div>
+
+<div id="subject_form" style="position:absolute;right:0px;top:0px;width:90%;height:100%" hidden=true>
+<p>
+<br><b>Enter Conversation Topic</b><br>
+<input type="text" id="subject_text" style="width:100%" value="New Subject"><br>
+<input type="button" id="subject_commit" onclick="set_subject()" value="Set">
+<input type="button" id="subject_cancel" onclick="show_subject_form(false)" value="Cancel">
+</p>
+</div>
+
+<div id="jukebox_form" style="position:absolute;right:0px;top:0px;width:90%;height:100%" hidden=true>
+<p>
+<br><b>Audio Settings</b><br>
+<input type="checkbox" id="jukebox_enable" onclick="jukebox_enable_clicked()" name="jukebox_enable" value="true" checked>Enable Music<br>
+<label for="jukebox_volume">Volume:</label>
+<input type="range" id="jukebox_volume" name="jukebox_volume" onchange="jukebox_volume_changed()" min="0" max="100"><br>
+<br><b>Music URL</b><br>
+<input type="text" id="jukebox_url" style="width:100%" value="New URL"><br>
+<input type="button" id="jukebox_play" onclick="jukebox_play_clicked()" value="Play">
+<input type="button" id="jukebox_cancel" onclick="jukebox_form_show(false)" value="Cancel">
+</p>
+<audio id="audio"></audio>
+<div id="youtube_player"></div>
+<script>
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+</div>
+
+</div>
+
+<div id="about_form" style="position:absolute;right:0px;top:0px;width:90%;height:100%" hidden=true>
+<p>
+<br><b>About Happy Hour</b><br><br>
+<span>This is a totally free video chat system for you to hangout in. It uses free software and free servers to give you free video chats. It is based on the jitsi.org WebRTC software and system and it is hosted by netlify. Source code, such as it is, can be found at https://github.com/atom-bomb/happyhour.</span><br><br>
+<input type="button" id="about_cancel" onclick="about_form_show(false)" value="Whatever">
+</p>
+</div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script src="https://dweet.io/client/dweet.io.min.js"></script>
+<script src="happy_hour.js"></script>
+</body>
+</html>
