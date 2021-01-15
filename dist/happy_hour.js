@@ -1,5 +1,6 @@
 var party_name = "happy_hour";
-var room_capacity = 5;
+var room_capacity = 6;
+var enable_lobby = false;
 
 var dweet_channel = party_name;
 
@@ -58,7 +59,7 @@ var jukebox = {
   audio: document.getElementById("audio"),
   youtube_player: null,
   enabled: true,
-  volume: 50,
+  volume: 25,
   url: ""
 };
 
@@ -289,9 +290,11 @@ function join_room(new_room_number) {
 
     jitsi.addEventListener("participantJoined", someone_joined);
     jitsi.addEventListener("participantLeft", someone_left);
+    jitsi.addEventListener("participantRoleChanged", role_changed);
     jitsi.addEventListener("videoConferenceJoined", you_joined);
     jitsi.addEventListener("videoConferenceLeft", you_left);
     jitsi.addEventListener("subjectChange", subject_changed);
+    jitsi.addEventListener("dominantSpeakerChanged", speaker_changed);
   }
 }
 
@@ -311,6 +314,12 @@ function someone_left(someone) {
   rooms[room_number].headcount_valid = true;
 
   update_room_button(room_number);
+}
+
+function role_changed(role_change) {
+  if (role_change.role === 'moderator') {
+    jitsi.executeCommand('toggleLobby', enable_lobby);
+  }
 }
 
 function you_joined(someone) {
@@ -340,6 +349,10 @@ function subject_changed(subject) {
 
   rooms[room_number].subject = subject.subject;
   update_room_button(room_number);
+}
+
+function speaker_changed(speaker) {
+  console.log("speaking now " + speaker.id);
 }
 
 function dweet_music() {
