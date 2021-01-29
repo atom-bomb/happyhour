@@ -1,6 +1,7 @@
 var party_name = "happy_hour";
 var room_capacity = 6;
 var enable_lobby = false;
+var block_full_rooms = false;
 
 var dweet_channel = party_name;
 
@@ -16,6 +17,10 @@ var video_div = document.getElementById("video");
 var subject_form = document.getElementById("subject_form");
 var jukebox_form = document.getElementById("jukebox_form");
 var about_form = document.getElementById("about_form");
+
+var speaker_stats = {};
+var current_speaker_id = null;
+var current_speaker_start = 0;
 
 var rooms = 
   [ { jitsi_name: party_name + "_1",
@@ -59,7 +64,7 @@ var jukebox = {
   audio: document.getElementById("audio"),
   youtube_player: null,
   enabled: true,
-  volume: 25,
+  volume: 15,
   url: ""
 };
 
@@ -232,10 +237,12 @@ function update_room_button(button_room_number) {
     rooms[button_room_number].button.value = 
       rooms[button_room_number].headcount + " people";
 
-  if (rooms[button_room_number].headcount > room_capacity) {
-    rooms[button_room_number].button.disabled = true;
-  } else {
-    rooms[button_room_number].button.disabled = false;
+  if (block_full_rooms == true) {
+    if (rooms[button_room_number].headcount > room_capacity) {
+      rooms[button_room_number].button.disabled = true;
+    } else {
+      rooms[button_room_number].button.disabled = false;
+    }
   }
 }
 
@@ -304,6 +311,8 @@ function someone_joined(someone) {
   rooms[room_number].headcount = jitsi.getNumberOfParticipants();
   rooms[room_number].headcount_valid = true;
 
+  speaker_stats[someone.id] = { count:0, duration:0 } ;
+
   update_room_button(room_number);
 }
 
@@ -312,6 +321,14 @@ function someone_left(someone) {
 
   rooms[room_number].headcount = jitsi.getNumberOfParticipants();
   rooms[room_number].headcount_valid = true;
+
+  if (someone.id in speaker_stats) {
+    delete speaker_stats[someone.id];
+  }
+
+  if (someone.id === current_speaker_id) {
+    current_speaker_id = null;
+  }
 
   update_room_button(room_number);
 }
@@ -328,6 +345,11 @@ function you_joined(someone) {
   rooms[room_number].headcount = jitsi.getNumberOfParticipants();
   rooms[room_number].headcount_valid = true;
 
+	speaker_stats = {};
+	speaker_stats[someone.id] = { count:0, duration:0 };
+
+	// jitsi.getParticipantsInfo() gives an array of this: {avatarURL: undefined, displayName: "bad guy", formattedDisplayName: "bad guy (me)", participantId: "ae5188b3"}
+
   update_room_button(room_number);
 
   dweet_headcount();
@@ -338,6 +360,8 @@ function you_left(someone) {
 
   if (rooms[room_number].headcount > 0)
     rooms[room_number].headcount--;
+
+	speaker_stats = {};
 
   update_room_button(room_number);
 
@@ -352,7 +376,30 @@ function subject_changed(subject) {
 }
 
 function speaker_changed(speaker) {
+
   console.log("speaking now " + speaker.id);
+
+  if (current_speaker_id !== null) {
+    var last_duration = Date.now() - current_speaker_start;
+
+    if (current_speaker_id in speaker_stats) {
+	    speaker_stats[current_speaker_id].duration = 
+                    speaker_stats[current_speaker_id].duration + last_duration;
+	  } else {
+	    speaker_stats[current_speaker_id].duration = last_duration;
+	    speaker_stats[current_speaker_id].count = 1;
+	  }
+  }
+
+  if (speaker.id in speaker_stats) {
+    speaker_stats[speaker.id].count = speaker_stats[speaker.id].count + 1;
+  } else {
+    speaker_stats[speaker.id].count = 1;
+    speaker_stats[speaker.id].duration = 0;
+  }
+
+  current_speaker_id = speaker.id;
+  current_speaker_start = Date.now();
 }
 
 function dweet_music() {
